@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Title</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.0/chart.min.js"
+		integrity="sha512-GMGzUEevhWh8Tc/njS0bDpwgxdCJLQBWG3Z2Ct+JGOpVnEmjvNx6ts4v6A2XJf1HOrtOsfhv3hBKpK9kE5z8AQ=="
+		crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+</head>
+
+<body>
+	<div>
+		<canvas id="myChart" width="900" height="600"></canvas>
+	</div>
+
+	<script>
+		const ctx = document.getElementById('myChart').getContext('2d');
+				const myChart = new Chart(ctx, {
+					type: 'line',
+					data: {
+						datasets: [{
+							label: 'logs.received',
+							backgroundColor: '#F00',
+							data: []
+						},
+						{
+							label: 'logs.processed',
+							backgroundColor: '#0F0',
+							data: []
+						}]
+					},
+					options: {
+						responsive: false,
+						scales: {
+							x: {
+								type: 'timeseries',
+							}
+						}
+					}
+				});
+		setInterval(() => {
+			fetch('/api/meter/logs.received/rate')
+			.then(response => response.json())
+			.then(data => {
+				myChart.data.datasets[0].data = data;
+				myChart.update();
+			});
+		}, 5000);
+				setInterval(() => {
+			fetch('/api/meter/logs.processed/rate')
+			.then(response => response.json())
+			.then(data => {
+				myChart.data.datasets[1].data = data;
+				myChart.update();
+			});
+		}, 5000);
+	</script>
+
+</body>
+
+</html>
