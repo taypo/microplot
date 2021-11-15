@@ -52,4 +52,25 @@
 		</dependency>
 	</dependencies>
 
+	<developers>
+		<developer>
+			<name>Bahadır Yağan</name>
+			<email>bahadir.yagan@gmail.com</email>
+			<url>https://github.com/taypo</url>
+		</developer>
+	</developers>
+
+	<licenses>
+		<license>
+			<name>The Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
+
+	<scm>
+		<connection>scm:git:git://github.com/taypo/microplot.git</connection>
+		<developerConnection>scm:git:git@github.com:taypo/microplot.git</developerConnection>
+		<url>https://github.com/taypo/microplot</url>
+	</scm>
+
 </project>
