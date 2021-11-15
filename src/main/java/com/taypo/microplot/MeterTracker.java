@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class MeterTracker {
-	private Map<String, Collection<Measurement>> store = new HashMap<>();
+	private final Map<String, Collection<Measurement>> store = new HashMap<>();
 
 	private final MeterRegistry meterRegistry;
 	private final MPConfig config;

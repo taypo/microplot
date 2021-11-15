@@ -3,7 +3,9 @@ package com.taypo.microplot;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.time.Duration;
 import java.util.Collection;
@@ -11,21 +13,36 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @RestController
+@RequestMapping("${microplot.uri-path:/microplot}")
 public class MeterResource {
 
 	private final MeterTracker meterTracker;
+	private final MPConfig mpConfig;
 
-	public MeterResource(MeterTracker meterTracker) {
+	public MeterResource(MeterTracker meterTracker, MPConfig mpConfig) {
 		this.meterTracker = meterTracker;
+		this.mpConfig = mpConfig;
 	}
 
-	// TODO make configurable base path
-	@GetMapping("/api/meter/{name}")
+	@GetMapping("/")
+	public ModelAndView home() {
+		return new ModelAndView("redirect:"
+				+ mpConfig.getUriPath()
+				+ "/index.html?basepath="
+				+ mpConfig.getUriPath());
+	}
+
+	@GetMapping("/config")
+	public MPConfig config() {
+		return mpConfig;
+	}
+
+	@GetMapping("/meter/{name}")
 	public Collection getMeterData(@PathVariable String name) {
 		return meterTracker.getStore().get(name);
 	}
 
-	@GetMapping("/api/meter/{name}/rate")
+	@GetMapping("/meter/{name}/rate")
 	public Collection getMeterRate(@PathVariable String name) {
 		Measurement[] measurements = meterTracker.getStore().get(name).toArray(new Measurement[]{});
 		return IntStream.range(0, measurements.length - 1)
