@@ -7,8 +7,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.io.Serializable;
 import java.time.Duration;
 import java.util.Collection;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -33,8 +35,11 @@ public class MeterResource {
 	}
 
 	@GetMapping("/config")
-	public MPConfig config() {
-		return mpConfig;
+	public Map<String, Serializable> config() {
+		return Map.of(
+				"includeMetrics", mpConfig.getIncludeMetrics(),
+				"period", mpConfig.getPeriod()
+		);
 	}
 
 	@GetMapping("/meter/{name}")
