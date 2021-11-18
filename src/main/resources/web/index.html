@@ -12,55 +12,59 @@
 </head>
 
 <body>
-	<div>
-		<canvas id="myChart" width="900" height="600"></canvas>
+	<div id="container" style="display: flex; flex-wrap: wrap;">
+
 	</div>
 
 	<script>
+		// Theme colors from chartjs-plugin-colorschemes
+		const Paired12 = ['#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928'];
+
 		const params = new URLSearchParams(window.location.search)
 		const basePath = params.get('basepath');
-		var myChart;
+
+		var charts = [];
 
 		fetch(basePath + '/config')
 			.then(response => response.json())
 			.then(data => {
-				createChart(data.includeMetrics);
+				createCharts(data.includeMetrics);
 				startTimers(data.includeMetrics, data.period);
 			});
 
-		function createChart(metrics) {
-			const ctx = document.getElementById('myChart').getContext('2d');
-			myChart = new Chart(ctx, {
-				type: 'line',
-				data: {
-					datasets: []
-				},
-				options: {
-					responsive: false,
-					animation: {
-						duration: 0
+		function createCharts(metrics) {
+			const container = document.getElementById('container');
+
+			metrics.forEach(m => {
+				const canvas = document.createElement('canvas');
+				canvas.setAttribute('id', m);
+				canvas.setAttribute('width', '600');
+				canvas.setAttribute('height', '500');
+				container.appendChild(canvas);
+
+				const ctx = canvas.getContext('2d');
+				const chart = new Chart(ctx, {
+					type: 'line',
+					data: {
+						datasets: []
 					},
-					scales: {
-						x: {
-							type: 'timeseries',
+					options: {
+						responsive: false,
+						animation: {
+							duration: 0
+						},
+						scales: {
+							x: {
+								type: 'timeseries',
+							}
 						}
 					}
-				}
-			});
-		}
-
-		// Theme colors from chartjs-plugin-colorschemes
-		const Paired12 = ['#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928'];
-		function createDatasets(metrics) {
-			var datasets = [];
-			metrics.forEach((metric, i) => {
-				datasets.push({
-					label: metric,
-					backgroundColor: Paired12[i % 12],
-					data: []
+				});
+				charts.push({
+					name: m,
+					chart: chart
 				});
 			});
-			return datasets;
 		}
 
 		function startTimers(metrics, period) {
@@ -77,8 +81,9 @@
 									data: data[d]
 								});
 							});
-							myChart.data.datasets = datasets;
-							myChart.update();
+							const chart = charts.find(e => e.name == metric).chart;
+							chart.data.datasets = datasets;
+							chart.update();
 						});
 				}, period);
 			});
