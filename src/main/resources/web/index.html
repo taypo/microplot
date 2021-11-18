@@ -33,10 +33,13 @@
 			myChart = new Chart(ctx, {
 				type: 'line',
 				data: {
-					datasets: createDatasets(metrics)
+					datasets: []
 				},
 				options: {
 					responsive: false,
+					animation: {
+						duration: 0
+					},
 					scales: {
 						x: {
 							type: 'timeseries',
@@ -53,7 +56,7 @@
 			metrics.forEach((metric, i) => {
 				datasets.push({
 					label: metric,
-					backgroundColor: Paired12[i%12],
+					backgroundColor: Paired12[i % 12],
 					data: []
 				});
 			});
@@ -63,10 +66,18 @@
 		function startTimers(metrics, period) {
 			metrics.forEach((metric, i) => {
 				setInterval(() => {
-					fetch(basePath + '/meter/' + metric + '/rate')
+					var datasets = [];
+					fetch(basePath + '/meter/' + metric)
 						.then(response => response.json())
 						.then(data => {
-							myChart.data.datasets[i].data = data;
+							Object.keys(data).forEach((d, i) => {
+								datasets.push({
+									label: d,
+									backgroundColor: Paired12[i % 12],
+									data: data[d]
+								});
+							});
+							myChart.data.datasets = datasets;
 							myChart.update();
 						});
 				}, period);

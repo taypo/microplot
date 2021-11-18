@@ -10,6 +10,7 @@ import org.springframework.web.servlet.ModelAndView;
 import java.io.Serializable;
 import java.time.Duration;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -42,18 +43,30 @@ public class MeterResource {
 		);
 	}
 
+	@GetMapping("/metrics")
+	public Map<String, Map<String, Collection<Measurement>>> getMetrics() {
+		return meterTracker.getStore();
+	}
+
 	@GetMapping("/meter/{name}")
-	public Collection getMeterData(@PathVariable String name) {
+	public Map<String, Collection<Measurement>> getMeterData(@PathVariable String name) {
 		return meterTracker.getStore().get(name);
 	}
 
+	// TODO move to frontend
+	/*
 	@GetMapping("/meter/{name}/rate")
 	public Collection getMeterRate(@PathVariable String name) {
-		Measurement[] measurements = meterTracker.getStore().get(name).toArray(new Measurement[]{});
+		Collection<Measurement> measurementCollection = meterTracker.getStore().get(name);
+		if(measurementCollection == null) {
+			return Collections.EMPTY_LIST;
+		}
+		Measurement[] measurements = measurementCollection.toArray(new Measurement[]{});
 		return IntStream.range(0, measurements.length - 1)
 				.mapToObj(i -> Pair.of(measurements[i], measurements[i + 1]))
 				.map(it -> new Measurement(it.getRight().x, (it.getRight().y - it.getLeft().y)
 						/ Duration.between(it.getLeft().x, it.getRight().x).toSeconds()))
 				.collect(Collectors.toList());
 	}
+	 */
 }
