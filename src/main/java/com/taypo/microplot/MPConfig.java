@@ -12,7 +12,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class MPConfig implements WebMvcConfigurer {
 	private String uriPath = "/micrometer";
 	private String[] includeMetrics;
-	private int keepRecordsMax = 200;
+	private int keepRecordsMax = 100;
 	private int period = 5000;
 
 	@Override

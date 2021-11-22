@@ -22,12 +22,14 @@
 
 		const params = new URLSearchParams(window.location.search)
 		const basePath = params.get('basepath');
+		var typeMap;
 
 		var charts = [];
 
 		fetch(basePath + '/config')
 			.then(response => response.json())
 			.then(data => {
+				typeMap = data.typeMap;
 				createCharts(data.includeMetrics);
 				startTimers(data.includeMetrics, data.period);
 			});
@@ -78,7 +80,7 @@
 								datasets.push({
 									label: d,
 									backgroundColor: Paired12[i % 12],
-									data: data[d]
+									data: prepareData(metric, data[d])
 								});
 							});
 							const chart = charts.find(e => e.name == metric).chart;
@@ -87,6 +89,22 @@
 						});
 				}, period);
 			});
+		}
+
+		function prepareData(metric, data) {
+			if(typeMap[metric] == 'COUNTER')
+				return rate(data);
+			return data;
+		}
+
+		function rate(data) {
+			return [...Array(data.length - 1).keys()]
+				.map((m, i) => { return { left: data[i], right: data[i + 1] } })
+				.map(p => { return { x: p.right.x, y: ((p.right.y - p.left.y) / timeDiff(p.left.x, p.right.x)) } })
+		}
+
+		function timeDiff(t1, t2) {
+			return (new Date(t2).getTime() - new Date(t1).getTime()) / 1000;
 		}
 
 	</script>

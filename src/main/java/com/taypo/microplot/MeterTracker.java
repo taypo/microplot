@@ -9,12 +9,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class MeterTracker {
 	private static final Logger log = LoggerFactory.getLogger(MeterTracker.class);
 	private final Map<String, Map<String, Collection<Measurement>>> store = new HashMap<>();
+	private final Map<String, Meter.Type> typeMap = new HashMap<>();
 
 	private final MeterRegistry meterRegistry;
 	private final MPConfig config;
@@ -24,38 +24,43 @@ public class MeterTracker {
 		this.config = config;
 	}
 
-	@Scheduled(fixedRateString = "${micrometer.period:5000}")
+	@Scheduled(fixedRateString = "${microplot.period:5000}")
 	public void tick() {
-		//meterRegistry.getMeters().stream().forEach(m -> System.out.println(m.getId().getName() + " : " + m.getClass().getName()));
-
 		for (var meterName : config.getIncludeMetrics()) {
 			var meters = meterRegistry.find(meterName).meters();
 			log.debug("Found " + meters.size() + " meters for metric " + meterName);
 
+			var now = LocalDateTime.now();
+
 			for (var meter : meters) {
-				var name = meter.getId().getConventionName(meterRegistry.config().namingConvention());
-				var tags = getTagsAsString(meter);
-				var measurements = getMeasurements(meterName, name + tags);
+				var measurements = getMeasurements(meter);
 				var v = readMeter(meter);
-				measurements.add(new Measurement(LocalDateTime.now(), v));
+				measurements.add(new Measurement(now, v));
 			}
 		}
 	}
 
 	private String getTagsAsString(Meter meter) {
-		List<Tag> tags = meter.getId().getConventionTags(meterRegistry.config().namingConvention());
-		StringBuilder sb = new StringBuilder();
+		var tags = meter.getId().getConventionTags(meterRegistry.config().namingConvention());
+		var sb = new StringBuilder();
 		sb.append("{");
 		tags.stream().forEach(t -> sb.append(t.getKey() + "=\"" + t.getValue() + "\","));
 		sb.append("}");
 		return sb.toString();
 	}
 
-	private Collection<Measurement> getMeasurements(String meterName, String fullName) {
-		if (store.containsKey(meterName) == false) {
-			store.put(meterName, new HashMap<>());
+	private Collection<Measurement> getMeasurements(Meter meter) {
+		var name = meter.getId().getName();
+		var conventionName = meter.getId().getConventionName(meterRegistry.config().namingConvention());
+		var tags = getTagsAsString(meter);
+		var fullName = conventionName + tags;
+
+		if (store.containsKey(name) == false) {
+			store.put(name, new HashMap<>());
+			typeMap.put(name, meter.getId().getType());
 		}
-		var mm = store.get(meterName);
+
+		var mm = store.get(name);
 		if (mm.containsKey(fullName) == false) {
 			mm.put(fullName, new CircularFifoQueue<>(config.getKeepRecordsMax()));
 		}
@@ -80,4 +85,7 @@ public class MeterTracker {
 		return store;
 	}
 
+	public Map<String, Meter.Type> getTypeMap() {
+		return typeMap;
+	}
 }
