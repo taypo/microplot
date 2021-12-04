@@ -7,7 +7,7 @@ Add it to your project dependencies:
 <dependency>
     <groupId>com.taypo</groupId>
     <artifactId>microplot</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
 </dependency>
 ```
 
