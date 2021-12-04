@@ -1,4 +1,4 @@
-#Microplot
+# Microplot
 
 Microplot is a small library to plot Micrometer metrics. It is intended to be used during development.
 
@@ -12,7 +12,7 @@ Add it to your project dependencies:
 ```
 
 Simply state what metrics you need to be stored and plotted in your `application.properties` file:
-```
+```properties
 management.endpoints.web.exposure.include=*
 microplot.include-metrics=jvm.memory.used,process.cpu.usage,logs.received,logs.processed
 ```
