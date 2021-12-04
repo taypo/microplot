@@ -32,6 +32,15 @@ And point your browser to `http://localhost:8080/microplot/`:
 
 
 ## Dependencies
+- Spring Web MVC
+- Actuator and Micrometer
+- Your project should contain `@EnableScheduling` annotation.
+- Apache Commons Lang and Collections
 
 ## What's New
 
+### 1.0.0 (04.12.2021)
+
+- First release. Hurray!
+- Gauge and Counter metrics supported.
+- Counters are plotted as rate per second.
